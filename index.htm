@@ -5,25 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TCS Order Portal</title>
     <style>
-        /* تعريف الألوان الخاصة بك */
         :root {
-            --dark-blue: #1a365d;    /* أزرق غامق احترافي */
-            --orange: #f6ad55;       /* برتقالي هادي ومريح */
-            --white: #ffffff;        /* أبيض نقي */
-            --bg-light: #f7fafc;    /* خلفية رمادي خفيف جداً */
+            --dark-blue: #1a365d;
+            --orange: #f6ad55;
+            --white: #ffffff;
+            --bg-light: #f7fafc;
         }
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-light);
+            overflow: hidden; /* لمنع السكرول الخارجي */
+        }
+
+        /* حاوية الإدخال */
+        #main-container {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
         }
 
-        .container {
+        .card {
             background-color: var(--white);
             padding: 40px;
             border-radius: 20px;
@@ -31,21 +36,11 @@
             text-align: center;
             width: 100%;
             max-width: 380px;
-            border-top: 8px solid var(--dark-blue); /* خط علوي بالأزرق الغامق */
+            border-top: 8px solid var(--dark-blue);
         }
 
-        h1 {
-            color: var(--dark-blue);
-            margin-bottom: 10px;
-            font-size: 26px;
-            font-weight: 800;
-        }
-
-        p {
-            color: #4a5568;
-            margin-bottom: 30px;
-            font-size: 15px;
-        }
+        h1 { color: var(--dark-blue); margin-bottom: 10px; }
+        p { color: #4a5568; margin-bottom: 30px; }
 
         .input-box {
             width: 100%;
@@ -54,75 +49,121 @@
             border-radius: 12px;
             box-sizing: border-box;
             font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
             margin-bottom: 20px;
-            color: var(--dark-blue);
-        }
-
-        .input-box:focus {
-            border-color: var(--orange); /* يتحول للبرتقالي عند الكتابة */
-            box-shadow: 0 0 0 3px rgba(246, 173, 85, 0.2);
+            outline: none;
         }
 
         #view-btn {
             width: 100%;
             padding: 15px;
             background-color: var(--dark-blue);
-            color: var(--white);
+            color: white;
             border: none;
             border-radius: 12px;
             font-size: 17px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        #view-btn:hover {
-            background-color: var(--orange); /* يتحول للبرتقالي عند الوقوف عليه */
-            transform: translateY(-2px);
+        /* واجهة العرض (iFrame) */
+        #viewer-section {
+            display: none; /* مخفي في البداية */
+            width: 100%;
+            height: 100vh;
+            position: relative;
         }
 
-        #view-btn:active {
-            transform: translateY(0);
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* زرار الطباعة */
+        .action-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+
+        .btn-action {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .print-btn { background-color: var(--orange); color: white; }
+        .back-btn { background-color: var(--dark-blue); color: white; }
+
+        /* إخفاء الأزرار عند الطباعة */
+        @media print {
+            .action-buttons { display: none; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📦 TCS Order</h1>
-    <p>Enter your order number to proceed</p>
+<div id="main-container">
+    <div class="card">
+        <h1>📦 TCS Order</h1>
+        <p>Enter order number to display details</p>
+        <input type="text" id="order_input" class="input-box" placeholder="Order Number..." autofocus>
+        <button id="view-btn">View Inside Frame</button>
+    </div>
+</div>
 
-    <input type="text" id="order_input" class="input-box" placeholder="Order Number..." autofocus>
-
-    <button id="view-btn">View Details</button>
+<div id="viewer-section">
+    <div class="action-buttons">
+        <button class="btn-action print-btn" onclick="printFrame()">Print Order</button>
+        <button class="btn-action back-btn" onclick="goBack()">Back</button>
+    </div>
+    <iframe id="order-frame" name="order-frame"></iframe>
 </div>
 
 <script>
     const input = document.getElementById("order_input");
-    const button = document.getElementById("view-btn");
+    const viewBtn = document.getElementById("view-btn");
+    const mainContainer = document.getElementById("main-container");
+    const viewerSection = document.getElementById("viewer-section");
+    const iframe = document.getElementById("order-frame");
 
-    // وظيفة التحويل عند الضغط على الزرار
-    button.addEventListener('click', function(){
+    viewBtn.addEventListener('click', function(){
         const orderId = input.value.trim();
-        
         if(orderId === "") {
-            alert("يرجى إدخال رقم الطلب أولاً");
+            alert("يرجى إدخال رقم الطلب");
             return;
         }
 
-        // الرابط الأصلي بتاعك مع رقم الأوردر بس
         const targetUrl = `https://www.portals-ksa.com/medications/order.php?order_id=${orderId}&branch_id=10473&lang=En`;
         
-        window.location.href = targetUrl;
+        // تحميل الرابط داخل الفريم
+        iframe.src = targetUrl;
+        
+        // تبديل الواجهات
+        mainContainer.style.display = 'none';
+        viewerSection.style.display = 'block';
     });
 
-    // إضافة خاصية الضغط على Enter من الكيبورد للسهولة
-    input.addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            button.click();
-        }
+    function printFrame() {
+        const frame = document.getElementById('order-frame').contentWindow;
+        frame.focus();
+        frame.print();
+    }
+
+    function goBack() {
+        viewerSection.style.display = 'none';
+        mainContainer.style.display = 'flex';
+        iframe.src = '';
+    }
+
+    input.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") viewBtn.click();
     });
 </script>
 

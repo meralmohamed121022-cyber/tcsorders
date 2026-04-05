@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Order Portal</title>
+    <style>
+        /* تعريف الألوان الخاصة بك */
+        :root {
+            --dark-blue: #1a365d;    /* أزرق غامق احترافي */
+            --orange: #f6ad55;       /* برتقالي هادي ومريح */
+            --white: #ffffff;        /* أبيض نقي */
+            --bg-light: #f7fafc;    /* خلفية رمادي خفيف جداً */
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(26, 54, 93, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 380px;
+            border-top: 8px solid var(--dark-blue); /* خط علوي بالأزرق الغامق */
+        }
+
+        h1 {
+            color: var(--dark-blue);
+            margin-bottom: 10px;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        p {
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            color: var(--dark-blue);
+        }
+
+        .input-box:focus {
+            border-color: var(--orange); /* يتحول للبرتقالي عند الكتابة */
+            box-shadow: 0 0 0 3px rgba(246, 173, 85, 0.2);
+        }
+
+        #view-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--dark-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #view-btn:hover {
+            background-color: var(--orange); /* يتحول للبرتقالي عند الوقوف عليه */
+            transform: translateY(-2px);
+        }
+
+        #view-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📦 TCS Order</h1>
+    <p>Enter your order number to proceed</p>
+
+    <input type="text" id="order_input" class="input-box" placeholder="Order Number..." autofocus>
+
+    <button id="view-btn">View Details</button>
+</div>
+
+<script>
+    const input = document.getElementById("order_input");
+    const button = document.getElementById("view-btn");
+
+    // وظيفة التحويل عند الضغط على الزرار
+    button.addEventListener('click', function(){
+        const orderId = input.value.trim();
+        
+        if(orderId === "") {
+            alert("يرجى إدخال رقم الطلب أولاً");
+            return;
+        }
+
+        // الرابط الأصلي بتاعك مع رقم الأوردر بس
+        const targetUrl = `https://www.portals-ksa.com/medications/order.php?order_id=${orderId}&branch_id=10473&lang=En`;
+        
+        window.location.href = targetUrl;
+    });
+
+    // إضافة خاصية الضغط على Enter من الكيبورد للسهولة
+    input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            button.click();
+        }
+    });
+</script>
+
+</body>
+</html>
